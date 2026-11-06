@@ -1,0 +1,15 @@
+<aside class="auth-panel">
+  <a class="brand" href="{{ url_for('login') }}">
+    <span class="brand-mark">{% include "_logo.html" %}</span><span>Study<span class="brand-accent">Slot</span></span>
+  </a>
+  <div class="auth-copy">
+    <h1>Find a free classroom and book it in a few steps.</h1>
+    <p>One clear place to see which rooms are free on campus — no walking from room to room, no double bookings.</p>
+    <ul class="features">
+      <li><span class="f-icon">{{ icon('search') }}</span>See free rooms by date and time</li>
+      <li><span class="f-icon">{{ icon('calendar') }}</span>Book, change or cancel in seconds</li>
+    </ul>
+    <div class="auth-illustration">{% include "_illustration_library.html" %}</div>
+  </div>
+  <div class="auth-foot">SW332 · Group 4 (O53)</div>
+</aside>

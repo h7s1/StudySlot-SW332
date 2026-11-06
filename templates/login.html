@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+{% block page %}
+<div class="auth">
+  {% include "_auth_panel.html" %}
+  <section class="auth-form-side">
+    <div class="card auth-card">
+      <h2>Welcome back</h2>
+      <p class="sub">Log in with your university email.</p>
+      <div style="margin-top:20px">{% include "_flashes.html" %}</div>
+      <form method="post" novalidate>
+        <label for="email">University email</label>
+        <div class="input-icon">{{ icon('mail') }}<input id="email" name="email" type="email" value="{{ email }}" placeholder="name@{{ university_domain }}" autofocus></div>
+        <label for="password">Password</label>
+        <div class="input-icon">{{ icon('lock') }}<input id="password" name="password" type="password" placeholder="Your password"></div>
+        <button class="btn btn-primary btn-block" type="submit">Log in {{ icon('arrow-right') }}</button>
+      </form>
+      <p class="auth-switch">New student? <a href="{{ url_for('register') }}">Create an account</a></p>
+    </div>
+  </section>
+</div>
+{% endblock %}

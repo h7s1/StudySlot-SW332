@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ building.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <a class="back-link" href="{{ url_for('rooms') }}">{{ icon('arrow-left', 'icon-sm') }}All buildings</a>
+    <span class="eyebrow">{{ icon('building', 'icon-sm') }}Building</span>
+    <h1>{{ building.name }}</h1>
+    <p class="muted">{{ building.rooms|length }} {{ 'classroom' if building.rooms|length == 1 else 'classrooms' }} · {{ building.seats }} seats in total · {{ building.floors|join(', ') }}</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('availability', date=today, building=building.slug) }}">{{ icon('search') }}Check free times for {{ building.name }}</a>
+</div>
+
+{% if buildings|length > 1 %}
+<nav class="switcher" aria-label="Other buildings">
+  <span class="muted small">Switch building</span>
+  {% for b in buildings %}
+  <a class="switch {{ 'active' if b.slug == building.slug }}" href="{{ url_for('building_rooms', slug=b.slug) }}">{{ b.name }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+<div class="room-grid">
+  {% for room in building.rooms %}
+  {% set periods = blocks[room.id] %}
+  <article class="card room">
+    <div class="room-top">
+      <span class="room-badge {{ tint(room.building) }}">{{ room.name.split('-')[0] }}</span>
+      <div>
+        <h3>{{ room.name }}</h3>
+        <p class="muted small">{{ room.building }}</p>
+      </div>
+    </div>
+    <div class="room-meta">
+      <div>{{ icon('users') }}{{ room.capacity }} {{ 'seat' if room.capacity == 1 else 'seats' }}</div>
+      <div>{{ icon('pin') }}{{ room.floor }}</div>
+    </div>
+    {% if room.features %}
+    <div class="tags">{% for f in room.features.split(',') %}<span class="tag">{{ f.strip() }}</span>{% endfor %}</div>
+    {% endif %}
+    {% if periods %}
+    <div class="blocked-box">
+      <div class="blocked-title">{{ icon('ban', 'icon-sm') }}Blocked times</div>
+      <ul class="blocked-list">
+        {% for p in periods[:4] %}
+        <li>
+          <span class="blocked-when">{{ p.date.strftime('%a %d %b') }} · {{ p.start }} - {{ p.end }}</span>
+          <span class="pill pill-{{ p.reason }}">{{ icon('wrench' if p.reason == 'maintenance' else 'book', 'icon-sm') }}{{ p.reason|capitalize }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if periods|length > 4 %}<p class="muted small">+ {{ periods|length - 4 }} more. See Check free times for the full list.</p>{% endif %}
+    </div>
+    {% endif %}
+    <div class="room-foot">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('availability', date=today, building=building.slug, _anchor='room-' ~ room.id) }}">Check free times {{ icon('arrow-right', 'icon-sm') }}</a>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

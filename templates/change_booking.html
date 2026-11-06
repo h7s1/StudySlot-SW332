@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Change booking{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">{{ icon('edit', 'icon-sm') }}Change booking</span>
+      <h1>Change your booking</h1>
+      <p class="muted">Pick a new room, date or time. We will check that it is free.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="current-box">
+      <span class="room-badge {{ tint(booking.building) }}">{{ booking.room_name.split('-')[0] }}</span>
+      <div>
+        <div class="detail-label">Current booking</div>
+        <div class="detail-value">Room {{ booking.room_name }} · {{ parse_date(booking.booking_date).strftime('%a %d %b') }} · {{ booking.slot_label }}</div>
+      </div>
+    </div>
+    <form method="post">
+      <label for="room_id">Room</label>
+      <select id="room_id" name="room_id">
+        {% for r in rooms %}
+        <option value="{{ r.id }}" {{ 'selected' if r.id == form.room_id }}>{{ r.name }} · {{ r.building }} ({{ r.capacity }} seats)</option>
+        {% endfor %}
+      </select>
+      <label for="date">Date</label>
+      <div class="input-icon">{{ icon('calendar') }}<input id="date" type="date" name="date" value="{{ form.date }}" min="{{ today }}" max="{{ max_date }}"></div>
+      <label for="slot_id">Time</label>
+      <select id="slot_id" name="slot_id">
+        {% for s in slots %}
+        <option value="{{ s.id }}" {{ 'selected' if s.id == form.slot_id }}>{{ s.label }}</option>
+        {% endfor %}
+      </select>
+      <div class="actions">
+        <a class="btn btn-ghost" href="{{ url_for('my_bookings') }}">{{ icon('arrow-left', 'icon-sm') }}Back</a>
+        <button class="btn btn-primary" type="submit">{{ icon('check') }}Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Buildings{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow">{{ icon('book', 'icon-sm') }}Ready to study?</span>
+    <h1>Hello, {{ g.user.full_name.split()[0] }}</h1>
+    <p>Find a quiet classroom for you or your study group, check when it is free and book it in a few steps.</p>
+    <div class="hero-chips">
+      <span class="hero-chip">{{ icon('door') }}{{ room_count }} classrooms</span>
+      <span class="hero-chip">{{ icon('pin') }}{{ buildings|length }} buildings</span>
+      <span class="hero-chip">{{ icon('clock') }}08:00 – 20:00</span>
+    </div>
+    <div class="hero-actions">
+      <a class="btn btn-gold" href="{{ url_for('availability') }}">{{ icon('search') }}Find a free room</a>
+      <a class="btn btn-on-dark" href="{{ url_for('my_bookings') }}">{{ icon('calendar') }}My bookings</a>
+    </div>
+  </div>
+  {% include "_illustration_library.html" %}
+</section>
+
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('building', 'icon-sm') }}Buildings</span>
+    <h2>Choose a building</h2>
+    <p class="muted">Tap a building to see its classrooms.</p>
+  </div>
+</div>
+
+{% if buildings %}
+<div class="building-grid">
+  {% for b in buildings %}
+  <a class="card building" href="{{ url_for('building_rooms', slug=b.slug) }}">
+    <div class="building-top">
+      <span class="building-badge {{ tint(b.name) }}">{{ b.code }}</span>
+      <div>
+        <h3>{{ b.name }}</h3>
+        <p class="muted small">{{ b.rooms|length }} {{ 'classroom' if b.rooms|length == 1 else 'classrooms' }}</p>
+      </div>
+    </div>
+    <div class="room-meta">
+      <div>{{ icon('users') }}{{ b.seats }} seats in total</div>
+      <div>{{ icon('pin') }}{{ b.floors|join(', ') }}</div>
+    </div>
+    <span class="building-go">View classrooms {{ icon('arrow-right', 'icon-sm') }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">
+  <span class="empty-icon">{{ icon('building') }}</span>
+  <h3>No buildings yet</h3>
+  <p class="muted">There are no classrooms yet.</p>
+</div>
+{% endif %}
+{% endblock %}

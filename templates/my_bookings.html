@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}My bookings{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('calendar', 'icon-sm') }}My bookings</span>
+    <h1>Upcoming bookings</h1>
+    <p class="muted">
+      {% if bookings %}You have {{ bookings|length }} upcoming booking{{ '' if bookings|length == 1 else 's' }}.{% else %}When and where you will study.{% endif %}
+    </p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('availability') }}">{{ icon('search') }}Book a room</a>
+</div>
+
+{% if bookings %}
+<div class="list">
+  {% for b in bookings %}
+  {% set d = parse_date(b.booking_date) %}
+  <article class="card booking">
+    <div class="booking-date">
+      <span class="month">{{ d.strftime('%b') }}</span>
+      <span class="day">{{ d.strftime('%d') }}</span>
+      <span class="wd">{{ d.strftime('%a') }}</span>
+    </div>
+    <div class="booking-info">
+      <h3>Room {{ b.room_name }}</h3>
+      <div class="booking-meta">
+        <span>{{ icon('clock') }}{{ b.slot_label }}</span>
+        <span>{{ icon('pin') }}{{ b.building }}, {{ b.floor }}</span>
+        <span>{{ icon('users') }}1 seat of {{ b.capacity }}</span>
+      </div>
+    </div>
+    <div class="booking-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('change_booking', booking_id=b.id) }}">{{ icon('edit', 'icon-sm') }}Change</a>
+      <a class="btn btn-danger-ghost btn-sm" href="{{ url_for('cancel_booking', booking_id=b.id) }}">{{ icon('x', 'icon-sm') }}Cancel</a>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">
+  <div class="empty-illustration">{% include "_illustration_library.html" %}</div>
+  <h3>No upcoming bookings</h3>
+  <p class="muted">You have no upcoming bookings. Find a free room and book it in a few steps.</p>
+  <a class="btn btn-primary" href="{{ url_for('availability') }}">{{ icon('search') }}Find a free room</a>
+</div>
+{% endif %}
+{% endblock %}

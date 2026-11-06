@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Block time slots{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('ban', 'icon-sm') }}Room availability</span>
+    <h1>Block time slots</h1>
+    <p class="muted">Blocked slots cannot be booked. Students see them as <strong>Blocked</strong> in Find a Free Room and on the classroom card in its building page.</p>
+  </div>
+</div>
+
+<div class="two-col">
+  <form class="card" method="post">
+    <div class="card-title"><span class="stat-icon tint-c" style="width:36px;height:36px;border-radius:10px">{{ icon('ban') }}</span><h3>New block</h3></div>
+    <label for="room_id">Room</label>
+    <select id="room_id" name="room_id">
+      <option value="">Choose a room</option>
+      {% for r in rooms %}
+      <option value="{{ r.id }}" {{ 'selected' if r.id == form.room_id }}>{{ r.name }} · {{ r.building }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="date">Date</label>
+    <div class="input-icon">{{ icon('calendar') }}<input id="date" type="date" name="date" value="{{ form.date }}" min="{{ today }}"></div>
+
+    <label>Time slots</label>
+    <div class="checks">
+      {% for s in slots %}
+      <label class="check"><input type="checkbox" name="slot_ids" value="{{ s.id }}" {{ 'checked' if s.id in form.slot_ids }}>{{ s.label }}</label>
+      {% endfor %}
+    </div>
+
+    <label>Reason</label>
+    <div class="checks">
+      <label class="check"><input type="radio" name="reason" value="class" {{ 'checked' if form.reason == 'class' }}>{{ icon('book', 'icon-sm') }}Class</label>
+      <label class="check"><input type="radio" name="reason" value="maintenance" {{ 'checked' if form.reason == 'maintenance' }}>{{ icon('wrench', 'icon-sm') }}Maintenance</label>
+    </div>
+
+    <label for="note">Note (optional)</label>
+    <input id="note" name="note" value="{{ form.note }}" placeholder="e.g. SW332 lecture">
+
+    <button class="btn btn-primary btn-block" type="submit">{{ icon('ban') }}Block selected slots</button>
+  </form>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>Upcoming blocked slots</h3>
+      <span class="count">{{ blocks|length }}</span>
+    </div>
+    {% if blocks %}
+    <table class="table">
+      <thead><tr><th>Date</th><th>Time</th><th>Room</th><th>Reason</th><th></th></tr></thead>
+      <tbody>
+        {% for b in blocks %}
+        <tr>
+          <td>{{ parse_date(b.block_date).strftime('%a %d %b') }}</td>
+          <td>{{ b.slot_label }}</td>
+          <td><strong>{{ b.room_name }}</strong><div class="muted small">{{ b.building }}</div></td>
+          <td>
+            <span class="pill pill-{{ b.reason }}">{{ icon('wrench' if b.reason == 'maintenance' else 'book', 'icon-sm') }}{{ b.reason|capitalize }}</span>
+            {% if b.note %}<div class="muted small" style="margin-top:4px">{{ b.note }}</div>{% endif %}
+          </td>
+          <td style="text-align:right">
+            <form method="post" action="{{ url_for('admin_unblock', block_id=b.id) }}">
+              <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty" style="padding:36px 0">
+      <span class="empty-icon">{{ icon('check') }}</span>
+      <p class="muted">No blocked time slots. All rooms are open for booking.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

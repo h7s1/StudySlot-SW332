@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow">{{ icon('grid', 'icon-sm') }}Admin dashboard</span>
+    <h1>Welcome back, {{ g.user.full_name }}</h1>
+    <p>Keep the room list accurate: block time slots when a room is used for a class or for maintenance.</p>
+    <div class="hero-actions">
+      <a class="btn btn-gold" href="{{ url_for('admin_block') }}">{{ icon('ban') }}Block time slots</a>
+    </div>
+  </div>
+  {% include "_illustration_library.html" %}
+</section>
+
+<div class="stats">
+  <div class="card stat"><span class="stat-icon tint-a">{{ icon('door') }}</span><div><span class="stat-num">{{ stats.rooms }}</span><span class="stat-label">Classrooms</span></div></div>
+  <div class="card stat"><span class="stat-icon tint-b">{{ icon('users') }}</span><div><span class="stat-num">{{ stats.students }}</span><span class="stat-label">Students</span></div></div>
+  <div class="card stat"><span class="stat-icon tint-a">{{ icon('calendar') }}</span><div><span class="stat-num">{{ stats.upcoming_bookings }}</span><span class="stat-label">Upcoming bookings</span></div></div>
+  <div class="card stat"><span class="stat-icon tint-c">{{ icon('ban') }}</span><div><span class="stat-num">{{ stats.upcoming_blocks }}</span><span class="stat-label">Blocked time slots</span></div></div>
+</div>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>Next blocked slots</h3>
+      <a class="small" href="{{ url_for('admin_block') }}">View all</a>
+    </div>
+    {% if blocks %}
+    <table class="table">
+      <thead><tr><th>Date</th><th>Time</th><th>Room</th><th>Reason</th></tr></thead>
+      <tbody>
+        {% for b in blocks %}
+        <tr>
+          <td>{{ parse_date(b.block_date).strftime('%a %d %b') }}</td>
+          <td>{{ b.slot_label }}</td>
+          <td><strong>{{ b.room_name }}</strong></td>
+          <td><span class="pill pill-{{ b.reason }}">{{ icon('wrench' if b.reason == 'maintenance' else 'book', 'icon-sm') }}{{ b.reason|capitalize }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted" style="margin-top:12px">No blocked time slots. All rooms are open for booking.</p>
+    {% endif %}
+  </div>
+{% endblock %}

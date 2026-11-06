@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }}{% endblock %}
+{% block content %}
+<div class="narrow narrow-center">
+  <div class="card error-page">
+    <span class="error-icon">{{ icon('lock' if code == 403 else 'alert') }}</span>
+    <span class="error-code">ERROR {{ code }}</span>
+    <h1>{{ message }}</h1>
+    <p class="muted">{% if code == 403 %}{{ 'This page is only for administrators.' if request.path.startswith('/admin') else 'You can only cancel or change your own bookings.' }}{% else %}Please check the address and try again.{% endif %}</p>
+    <a class="btn btn-primary" href="{{ url_for('index') }}">{{ icon('arrow-left', 'icon-sm') }}Go to home page</a>
+  </div>
+</div>
+{% endblock %}

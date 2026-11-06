@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}StudySlot{% endblock %} · StudySlot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox=%220 0 40 40%22 xmlns=%22http://www.w3.org/2000/svg%22%3E  %3Crect width=%2240%22 height=%2240%22 rx=%2210%22 fill=%22%23a0703f%22/%3E  %3Cpath d=%22M20 35s-11-9.2-11-18a11 11 0 0 1 22 0c0 8.8-11 18-11 18z%22 fill=%22%23fbf5ea%22/%3E  %3Cpath d=%22M20 14.6c-2.2-1.5-5-1.8-7.4-1v7.2c2.4-.8 5.2-.5 7.4 1z%22 fill=%22%231f4a37%22/%3E  %3Cpath d=%22M20 14.6c2.2-1.5 5-1.8 7.4-1v7.2c-2.4-.8-5.2-.5-7.4 1z%22 fill=%22%231f4a37%22 opacity=%22.8%22/%3E%3C/svg%3E">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% block page %}
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-mark">{% include "_logo.html" %}</span><span>Study<span class="brand-accent">Slot</span></span>
+      </a>
+      {% if g.user %}
+      <nav class="nav">
+        {% if g.user.role == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if request.endpoint == 'admin_dashboard' }}">{{ icon('grid') }}Dashboard</a>
+          <a href="{{ url_for('admin_block') }}" class="{{ 'active' if request.endpoint == 'admin_block' }}">{{ icon('ban') }}Block Time Slots</a>
+        {% else %}
+          <a href="{{ url_for('rooms') }}" class="{{ 'active' if request.endpoint in ('rooms', 'building_rooms') }}">{{ icon('building') }}Buildings</a>
+          <a href="{{ url_for('availability') }}" class="{{ 'active' if request.endpoint in ('availability', 'book') }}">{{ icon('search') }}Find a Free Room</a>
+          <a href="{{ url_for('my_bookings') }}" class="{{ 'active' if request.endpoint in ('my_bookings', 'cancel_booking', 'change_booking') }}">{{ icon('calendar') }}My Bookings</a>
+        {% endif %}
+      </nav>
+      <div class="user">
+        <span class="avatar">{{ initials(g.user.full_name) }}</span>
+        <span class="user-text">
+          <span class="user-name">{{ g.user.full_name }}</span>
+          <span class="user-role">{{ 'Administrator' if g.user.role == 'admin' else 'Student' }}</span>
+        </span>
+        <a href="{{ url_for('logout') }}" class="icon-btn" title="Log out" aria-label="Log out">{{ icon('logout') }}</a>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="wrap main">
+    {% include "_flashes.html" %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>© StudySlot · Classroom booking for university students</span>
+      <span>SW332 · Group 4 (O53) · Sprint 1</span>
+    </div>
+  </footer>
+{% endblock %}
+</body>
+</html>

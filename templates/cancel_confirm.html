@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Cancel booking{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">{{ icon('x', 'icon-sm') }}Cancel booking</span>
+      <h1>Cancel this booking?</h1>
+      <p class="muted">After you cancel, your seat is free and other students can book it.</p>
+    </div>
+  </div>
+  <div class="card ticket">
+    <div class="ticket-head danger">
+      <span class="room-badge">{{ booking.room_name.split('-')[0] }}</span>
+      <div>
+        <h2>Room {{ booking.room_name }}</h2>
+        <p>{{ booking.building }} · {{ booking.floor }}</p>
+      </div>
+    </div>
+    <div class="ticket-body">
+      <ul class="detail-list">
+        <li><span class="detail-icon">{{ icon('calendar') }}</span><div><div class="detail-label">Date</div><div class="detail-value">{{ parse_date(booking.booking_date).strftime('%A, %d %B %Y') }}</div></div></li>
+        <li><span class="detail-icon">{{ icon('clock') }}</span><div><div class="detail-label">Time</div><div class="detail-value">{{ booking.slot_label }}</div></div></li>
+      </ul>
+      <form method="post" class="actions">
+        <a class="btn btn-ghost" href="{{ url_for('my_bookings') }}">Keep booking</a>
+        <button class="btn btn-danger" type="submit">{{ icon('x') }}Yes, cancel it</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Confirm booking{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">{{ icon('check', 'icon-sm') }}Almost done</span>
+      <h1>Confirm your booking</h1>
+      <p class="muted">Please check the details before you confirm.</p>
+    </div>
+  </div>
+  <div class="card ticket">
+    <div class="ticket-head">
+      <span class="room-badge">{{ room.name.split('-')[0] }}</span>
+      <div>
+        <h2>Room {{ room.name }}</h2>
+        <p>{{ room.building }} · {{ room.floor }}</p>
+      </div>
+    </div>
+    <div class="ticket-body">
+      <ul class="detail-list">
+        <li><span class="detail-icon">{{ icon('calendar') }}</span><div><div class="detail-label">Date</div><div class="detail-value">{{ day.strftime('%A, %d %B %Y') }}</div></div></li>
+        <li><span class="detail-icon">{{ icon('clock') }}</span><div><div class="detail-label">Time</div><div class="detail-value">{{ slot.label }}</div></div></li>
+        <li><span class="detail-icon">{{ icon('users') }}</span><div><div class="detail-label">Seats</div><div class="detail-value">{{ seats_left }} of {{ room.capacity }} seats free, you take 1</div></div></li>
+        <li><span class="detail-icon">{{ icon('pin') }}</span><div><div class="detail-label">Location</div><div class="detail-value">{{ room.building }}, {{ room.floor }}</div></div></li>
+      </ul>
+      <p class="note">{{ icon('info') }}<span>Other students can book the remaining seats in this room at the same time. You can change or cancel this booking later from My Bookings.</span></p>
+      <form method="post" class="actions">
+        <input type="hidden" name="room_id" value="{{ room.id }}">
+        <input type="hidden" name="date" value="{{ day.isoformat() }}">
+        <input type="hidden" name="slot_id" value="{{ slot.id }}">
+        <a class="btn btn-ghost" href="{{ url_for('availability', date=day.isoformat()) }}">{{ icon('arrow-left', 'icon-sm') }}Back</a>
+        <button class="btn btn-primary" type="submit">{{ icon('check') }}Confirm booking</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

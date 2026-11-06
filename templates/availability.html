@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Find a free room{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('search', 'icon-sm') }}Availability</span>
+    <h1>Find a free room</h1>
+    <p class="muted">Choose a date and a time to see which rooms have free seats. Click a free slot to book it.</p>
+  </div>
+</div>
+
+<form class="card filter" method="get">
+  <div class="field">
+    <label for="date">Date</label>
+    <div class="input-icon">{{ icon('calendar') }}<input id="date" type="date" name="date" value="{{ date_str }}" min="{{ today }}" max="{{ max_date }}"></div>
+  </div>
+  <div class="field">
+    <label for="slot_id">Time</label>
+    <select id="slot_id" name="slot_id">
+      <option value="">All times</option>
+      {% for s in all_slots %}
+      <option value="{{ s.id }}" {{ 'selected' if s.id == slot_id }}>{{ s.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="building">Building</label>
+    <select id="building" name="building">
+      <option value="">All buildings</option>
+      {% for b in buildings %}
+      <option value="{{ b.slug }}" {{ 'selected' if b.slug == building_slug }}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">{{ icon('search') }}Check</button>
+  <div class="day-nav">
+    {% if prev_day %}<a class="btn btn-ghost" href="{{ url_for('availability', date=prev_day, slot_id=slot_id, building=building_slug or None) }}">{{ icon('arrow-left', 'icon-sm') }}Previous day</a>{% endif %}
+    {% if next_day %}<a class="btn btn-ghost" href="{{ url_for('availability', date=next_day, slot_id=slot_id, building=building_slug or None) }}">Next day {{ icon('arrow-right', 'icon-sm') }}</a>{% endif %}
+  </div>
+</form>
+
+{% if error %}
+  <div class="alert alert-error">{{ icon('alert') }}<span>{{ error }}</span></div>
+{% else %}
+  <div class="legend">
+    <span><i class="dot dot-free"></i>Free seats</span>
+    <span><i class="dot dot-booked"></i>Full</span>
+    <span><i class="dot dot-blocked"></i>Blocked (class or maintenance)</span>
+    <span><i class="dot dot-mine"></i>Your booking</span>
+    <span><i class="dot dot-past"></i>Time passed</span>
+    <span class="free-count">{{ icon('check', 'icon-sm') }}{{ free_count }} free slot{{ '' if free_count == 1 else 's' }} on {{ day.strftime('%a %d %b') }}</span>
+  </div>
+
+  {% if building %}
+  <p class="filter-note">{{ icon('building', 'icon-sm') }}Showing {{ building.name }} only. <a href="{{ url_for('availability', date=date_str, slot_id=slot_id) }}">Show all buildings</a></p>
+  {% endif %}
+
+  <div class="table-wrap card">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Room</th>
+          {% for s in slots %}<th>{{ icon('clock') }}{{ s.label }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in grid %}
+        <tr id="room-{{ row.room.id }}">
+          <th scope="row">
+            <div class="room-cell">
+              <span class="room-badge {{ tint(row.room.building) }}">{{ row.room.name.split('-')[0] }}</span>
+              <div>
+                <span class="room-name">{{ row.room.name }}</span>
+                <span class="muted small">{{ row.room.capacity }} seats</span>
+              </div>
+            </div>
+          </th>
+          {% for c in row.cells %}
+          <td>
+            {% if c.status == 'free' %}
+              <a class="cell cell-free" href="{{ url_for('book', room_id=row.room.id, date=date_str, slot_id=c.slot.id) }}"><span class="cell-main">Book</span><small>{{ c.seats_left }} of {{ row.room.capacity }} left</small></a>
+            {% elif c.status == 'mine' %}
+              <a class="cell cell-mine" href="{{ url_for('my_bookings') }}" title="You booked a seat in this room at this time"><span class="cell-main">{{ icon('check') }}Yours</span><small>your booking</small></a>
+            {% elif c.status == 'full' %}
+              <span class="cell cell-booked" title="All {{ row.room.capacity }} seats are booked"><span class="cell-main">Full</span><small>no seats left</small></span>
+            {% elif c.status == 'blocked' %}
+              <span class="cell cell-blocked" title="Blocked by the admin for {{ c.reason }}"><span class="cell-main">{{ icon('ban') }}Blocked</span><small>{{ c.reason|capitalize }}</small></span>
+            {% else %}
+              <span class="cell cell-past">—</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="note">{{ icon('info') }}<span>Each booking takes one seat. Several students can book the same room until all of its seats are taken, then it shows as Full.</span></p>
+{% endif %}
+{% endblock %}
