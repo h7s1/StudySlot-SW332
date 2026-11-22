@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Reported problems{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('flag', 'icon-sm') }}Reports</span>
+    <h1>Reported problems</h1>
+    <p class="muted">Problems students found in the classrooms. Mark a report as fixed and the student gets a notice.</p>
+  </div>
+</div>
+<div class="card">
+  <div class="section-head">
+    <h3>Reports</h3>
+    <span class="count">{{ rows|selectattr('status', 'equalto', 'open')|list|length }} open</span>
+  </div>
+  {% if rows %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Sent</th><th>Room</th><th>Problem</th><th>Student</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for p in rows %}
+      <tr>
+        <td>{{ p.created_at[:10] }}</td>
+        <td><strong>{{ p.room_name }}</strong><span class="muted small">{{ p.building }}</span></td>
+        <td><strong>{{ p.category }}</strong><span class="muted small">{{ p.description }}</span></td>
+        <td>{{ p.full_name }}<span class="muted small">{{ p.email }}</span></td>
+        <td><span class="pill pill-{{ p.status }}">{{ 'Open' if p.status == 'open' else 'Fixed' }}</span></td>
+        <td style="text-align:right">
+          {% if p.status == 'open' %}
+          <form method="post" action="{{ url_for('admin_report_resolve', report_id=p.id) }}">
+            <button class="btn btn-ghost btn-sm" type="submit">{{ icon('check', 'icon-sm') }}Mark as fixed</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty" style="padding:36px 0">
+    <span class="empty-icon">{{ icon('check') }}</span>
+    <p class="muted">No problems reported. All rooms are in good shape.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

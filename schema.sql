@@ -1,8 +1,13 @@
 -- StudySlot database schema (SQLite)
 -- Sprint 1: PBI-1 .. PBI-9 (booking rules updated: seats per room)
+-- Sprint 2: PBI-10 .. PBI-19 (tables at the end, also added to older databases on start)
 
 PRAGMA foreign_keys = ON;
 
+DROP TABLE IF EXISTS problem_reports;
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS blocked_slots;
 DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS time_slots;
@@ -27,7 +32,8 @@ CREATE TABLE rooms (
     building  TEXT    NOT NULL,
     floor     TEXT    NOT NULL,
     capacity  INTEGER NOT NULL CHECK (capacity > 0),
-    features  TEXT
+    features  TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1    -- PBI-10: 0 = removed by the admin (history is kept)
 );
 
 -- Fixed booking periods used by availability, booking and blocking
@@ -47,7 +53,8 @@ CREATE TABLE bookings (
     status       TEXT    NOT NULL DEFAULT 'active'
                          CHECK (status IN ('active', 'cancelled')),
     created_at   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TEXT
+    updated_at   TEXT,
+    cancel_note  TEXT                           -- PBI-18: why the admin cancelled it
 );
 
 CREATE INDEX ix_bookings_user ON bookings (user_id, booking_date);
@@ -101,3 +108,49 @@ WHEN NEW.status = 'active'
 BEGIN
     SELECT RAISE(ABORT, 'room is full');
 END;
+
+-- ===========================================================================
+-- Sprint 2 tables (CREATE ... IF NOT EXISTS, so older databases get them too)
+-- ===========================================================================
+
+-- PBI-14: settings the admin can change (daily booking hours limit)
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+INSERT OR IGNORE INTO settings (key, value) VALUES ('daily_limit_hours', '4');
+
+-- PBI-18 / PBI-19: notices and confirmation emails sent to students
+CREATE TABLE IF NOT EXISTS notifications (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id),
+    kind       TEXT    NOT NULL CHECK (kind IN ('email', 'notice')),
+    subject    TEXT    NOT NULL,
+    body       TEXT    NOT NULL,
+    is_read    INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS ix_notifications_user ON notifications (user_id, is_read);
+
+-- PBI-15: room reviews (one review per finished booking)
+CREATE TABLE IF NOT EXISTS reviews (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id),
+    room_id    INTEGER NOT NULL REFERENCES rooms(id),
+    booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(id),
+    rating     INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment    TEXT,
+    created_at TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- PBI-16: problems reported by students (broken projector, dirty room ...)
+CREATE TABLE IF NOT EXISTS problem_reports (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id),
+    room_id     INTEGER NOT NULL REFERENCES rooms(id),
+    category    TEXT    NOT NULL,
+    description TEXT    NOT NULL,
+    status      TEXT    NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved')),
+    created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TEXT
+);

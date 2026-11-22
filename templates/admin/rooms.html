@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Classrooms{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('door', 'icon-sm') }}Classrooms</span>
+    <h1>Manage classrooms</h1>
+    <p class="muted">Add a new room, change its details or remove it. Students see the changes right away.</p>
+  </div>
+</div>
+
+<div class="two-col">
+  <form class="card" method="post">
+    <div class="card-title"><span class="stat-icon tint-a" style="width:36px;height:36px;border-radius:10px">{{ icon('plus') }}</span><h3>Add a room</h3></div>
+    <div class="form-grid">
+      <div><label for="name">Room name</label><input id="name" name="name" value="{{ form.name }}" placeholder="e.g. A-110"></div>
+      <div><label for="capacity">Seats</label><input id="capacity" type="number" name="capacity" min="1" max="200" value="{{ form.capacity or '' }}" placeholder="e.g. 6"></div>
+      <div><label for="building">Building</label><input id="building" name="building" value="{{ form.building }}" list="building-list" placeholder="e.g. Building A">
+        <datalist id="building-list">{% for b in buildings %}<option value="{{ b }}">{% endfor %}</datalist></div>
+      <div><label for="floor">Floor</label><input id="floor" name="floor" value="{{ form.floor }}" placeholder="e.g. First floor"></div>
+      <div class="full"><label for="features">Features (optional)</label><input id="features" name="features" value="{{ form.features }}" placeholder="e.g. Projector, Whiteboard"></div>
+    </div>
+    <button class="btn btn-primary btn-block" type="submit" style="margin-top:18px">{{ icon('plus') }}Add room</button>
+  </form>
+
+  <div class="card">
+    <div class="section-head">
+      <h3>All classrooms</h3>
+      <span class="count">{{ rooms|length }}</span>
+    </div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Room</th><th>Seats</th><th>Upcoming</th><th></th></tr></thead>
+      <tbody>
+        {% for r in rooms %}
+        <tr>
+          <td><strong>{{ r.name }}</strong><span class="muted small">{{ r.building }} · {{ r.floor }}</span></td>
+          <td>{{ r.capacity }}</td>
+          <td>{{ r.upcoming }} booking{{ '' if r.upcoming == 1 else 's' }}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_room_edit', room_id=r.id) }}">{{ icon('edit', 'icon-sm') }}Edit</a>
+            <form method="post" action="{{ url_for('admin_room_remove', room_id=r.id) }}" style="display:inline">
+              <button class="btn btn-danger-ghost btn-sm" type="submit">{{ icon('trash', 'icon-sm') }}Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p class="note">{{ icon('info') }}<span>A room with upcoming bookings cannot be removed. Removed rooms are hidden from students, but old bookings keep the room name.</span></p>
+  </div>
+</div>
+{% endblock %}

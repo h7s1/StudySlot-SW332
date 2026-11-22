@@ -8,7 +8,6 @@
     <h1>{{ building.name }}</h1>
     <p class="muted">{{ building.rooms|length }} {{ 'classroom' if building.rooms|length == 1 else 'classrooms' }} · {{ building.seats }} seats in total · {{ building.floors|join(', ') }}</p>
   </div>
-  <a class="btn btn-primary" href="{{ url_for('availability', date=today, building=building.slug) }}">{{ icon('search') }}Check free times for {{ building.name }}</a>
 </div>
 
 {% if buildings|length > 1 %}
@@ -17,7 +16,12 @@
   {% for b in buildings %}
   <a class="switch {{ 'active' if b.slug == building.slug }}" href="{{ url_for('building_rooms', slug=b.slug) }}">{{ b.name }}</a>
   {% endfor %}
+  <a class="btn btn-primary switch-action" href="{{ url_for('availability', date=today, building=building.slug) }}">{{ icon('search') }}Check free times for {{ building.name }}</a>
 </nav>
+{% else %}
+<div class="switcher">
+  <a class="btn btn-primary" href="{{ url_for('availability', date=today, building=building.slug) }}">{{ icon('search') }}Check free times for {{ building.name }}</a>
+</div>
 {% endif %}
 
 <div class="room-grid">
@@ -38,6 +42,15 @@
     {% if room.features %}
     <div class="tags">{% for f in room.features.split(',') %}<span class="tag">{{ f.strip() }}</span>{% endfor %}</div>
     {% endif %}
+    {% set rt = ratings.get(room.id) %}
+    <div class="room-extra">
+      {% if rt %}
+      <span class="stars">{{ icon('star') }}{{ rt.avg }} / 5 <span class="muted small">({{ rt.count }} review{{ '' if rt.count == 1 else 's' }})</span></span>
+      {% for q in rt.latest %}<p class="review-quote">"{{ q }}"</p>{% endfor %}
+      {% else %}
+      <span class="muted small">No reviews yet</span>
+      {% endif %}
+    </div>
     {% if periods %}
     <div class="blocked-box">
       <div class="blocked-title">{{ icon('ban', 'icon-sm') }}Blocked times</div>
@@ -54,6 +67,7 @@
     {% endif %}
     <div class="room-foot">
       <a class="btn btn-ghost btn-sm" href="{{ url_for('availability', date=today, building=building.slug, _anchor='room-' ~ room.id) }}">Check free times {{ icon('arrow-right', 'icon-sm') }}</a>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('report_problem', room_id=room.id) }}">{{ icon('flag', 'icon-sm') }}Report a problem</a>
     </div>
   </article>
   {% endfor %}

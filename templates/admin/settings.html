@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Booking rules{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="page-head">
+    <div>
+      <a class="back-link" href="{{ url_for('admin_dashboard') }}">{{ icon('arrow-left', 'icon-sm') }}Dashboard</a>
+      <span class="eyebrow">{{ icon('sliders', 'icon-sm') }}Booking rules</span>
+      <h1>Daily booking limit</h1>
+      <p class="muted">The most hours one student can book on the same day. This keeps rooms fair for everyone.</p>
+    </div>
+  </div>
+  <form class="card" method="post">
+    <div class="setting-row">
+      <div>
+        <div class="detail-label">Current limit</div>
+        <div class="big-num">{{ limit }} hours</div>
+        <div class="muted small">= {{ (limit // 2) }} time slot{{ '' if limit == 2 else 's' }} of 2 hours per day</div>
+      </div>
+      <div style="min-width:220px">
+        <label for="daily_limit_hours" style="margin-top:0">New limit</label>
+        <select id="daily_limit_hours" name="daily_limit_hours">
+          {% for n in options %}<option value="{{ n }}" {{ 'selected' if n == limit }}>{{ n }} hours per day</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <p class="note">{{ icon('info') }}<span>The new limit is checked when a student books or changes a booking. Bookings that already exist are not changed.</span></p>
+    <div class="actions">
+      <button class="btn btn-primary" type="submit">{{ icon('check') }}Save limit</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

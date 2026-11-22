@@ -5,9 +5,10 @@
   <div>
     <span class="eyebrow">{{ icon('grid', 'icon-sm') }}Admin dashboard</span>
     <h1>Welcome back, {{ g.user.full_name }}</h1>
-    <p>Keep the room list accurate: block time slots when a room is used for a class or for maintenance.</p>
+    <p>Keep the rooms ready for students: check the bookings, manage the classrooms, block time for classes or maintenance and fix reported problems.</p>
     <div class="hero-actions">
-      <a class="btn btn-gold" href="{{ url_for('admin_block') }}">{{ icon('ban') }}Block time slots</a>
+      <a class="btn btn-gold" href="{{ url_for('admin_bookings') }}">{{ icon('list') }}See all bookings</a>
+      <a class="btn btn-on-dark" href="{{ url_for('admin_block') }}">{{ icon('ban') }}Block time slots</a>
     </div>
   </div>
   {% include "_illustration_library.html" %}
@@ -18,6 +19,12 @@
   <div class="card stat"><span class="stat-icon tint-b">{{ icon('users') }}</span><div><span class="stat-num">{{ stats.students }}</span><span class="stat-label">Students</span></div></div>
   <div class="card stat"><span class="stat-icon tint-a">{{ icon('calendar') }}</span><div><span class="stat-num">{{ stats.upcoming_bookings }}</span><span class="stat-label">Upcoming bookings</span></div></div>
   <div class="card stat"><span class="stat-icon tint-c">{{ icon('ban') }}</span><div><span class="stat-num">{{ stats.upcoming_blocks }}</span><span class="stat-label">Blocked time slots</span></div></div>
+</div>
+
+<div class="action-links">
+  <a class="card" href="{{ url_for('admin_rooms') }}"><span class="stat-icon tint-a">{{ icon('door') }}</span><div><strong>Manage classrooms</strong><span class="muted small">Add, edit or remove rooms</span></div></a>
+  <a class="card" href="{{ url_for('admin_reports') }}"><span class="stat-icon tint-c">{{ icon('flag') }}</span><div><strong>{{ stats.open_reports }} open report{{ '' if stats.open_reports == 1 else 's' }}</strong><span class="muted small">Problems sent by students</span></div></a>
+  <a class="card" href="{{ url_for('admin_settings') }}"><span class="stat-icon tint-b">{{ icon('sliders') }}</span><div><strong>Daily limit: {{ stats.daily_limit }} hours</strong><span class="muted small">Most hours a student can book per day</span></div></a>
 </div>
 
   <div class="card">

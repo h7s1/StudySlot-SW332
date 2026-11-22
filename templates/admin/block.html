@@ -5,9 +5,29 @@
   <div>
     <span class="eyebrow">{{ icon('ban', 'icon-sm') }}Room availability</span>
     <h1>Block time slots</h1>
-    <p class="muted">Blocked slots cannot be booked. Students see them as <strong>Blocked</strong> in Find a Free Room and on the classroom card in its building page.</p>
+    <p class="muted">Blocked slots cannot be booked. Students see them as <strong>Blocked</strong> in Find a Free Room and on the classroom card in its building page. If a slot already has bookings, you will see a warning first.</p>
   </div>
 </div>
+
+{% if affected %}
+<div class="warn-box" role="alert">
+  <h3>{{ icon('alert') }}{{ affected|length }} student{{ '' if affected|length == 1 else 's' }} already booked {{ 'this time' if form.slot_ids|length == 1 else 'these times' }}</h3>
+  <p>Room <strong>{{ room.name }}</strong> on <strong>{{ day.strftime('%A %d %B') }}</strong> has bookings in the slots you chose. If you block it, these bookings are cancelled and each student gets a notice and an email:</p>
+  <ul>
+    {% for b in affected %}<li><strong>{{ b.slot_label }}</strong> · {{ b.full_name }} ({{ b.email }})</li>{% endfor %}
+  </ul>
+  <form method="post" class="actions">
+    <input type="hidden" name="room_id" value="{{ form.room_id }}">
+    <input type="hidden" name="date" value="{{ form.date }}">
+    {% for sid in form.slot_ids %}<input type="hidden" name="slot_ids" value="{{ sid }}">{% endfor %}
+    <input type="hidden" name="reason" value="{{ form.reason }}">
+    <input type="hidden" name="note" value="{{ form.note }}">
+    <input type="hidden" name="confirm" value="yes">
+    <a class="btn btn-ghost" href="{{ url_for('admin_block') }}">Do not block</a>
+    <button class="btn btn-danger" type="submit">{{ icon('ban') }}Block and cancel {{ affected|length }} booking{{ '' if affected|length == 1 else 's' }}</button>
+  </form>
+</div>
+{% endif %}
 
 <div class="two-col">
   <form class="card" method="post">

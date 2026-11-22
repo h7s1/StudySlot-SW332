@@ -4,14 +4,24 @@
 <div class="page-head">
   <div>
     <span class="eyebrow">{{ icon('calendar', 'icon-sm') }}My bookings</span>
-    <h1>Upcoming bookings</h1>
+    <h1>{{ 'Upcoming bookings' if tab == 'upcoming' else 'Previous bookings' }}</h1>
     <p class="muted">
-      {% if bookings %}You have {{ bookings|length }} upcoming booking{{ '' if bookings|length == 1 else 's' }}.{% else %}When and where you will study.{% endif %}
+      {% if tab == 'upcoming' %}
+        {% if bookings %}You have {{ bookings|length }} upcoming booking{{ '' if bookings|length == 1 else 's' }}.{% else %}When and where you will study.{% endif %}
+      {% else %}
+        Rooms you used or cancelled. Book a room again in one click, or review a room you used.
+      {% endif %}
     </p>
   </div>
   <a class="btn btn-primary" href="{{ url_for('availability') }}">{{ icon('search') }}Book a room</a>
 </div>
 
+<nav class="tabs" aria-label="Bookings">
+  <a class="switch {{ 'active' if tab == 'upcoming' }}" href="{{ url_for('my_bookings') }}">Upcoming<span class="count">{{ upcoming_count }}</span></a>
+  <a class="switch {{ 'active' if tab == 'previous' }}" href="{{ url_for('my_bookings', tab='previous') }}">{{ icon('history', 'icon-sm') }} Previous<span class="count">{{ previous_count }}</span></a>
+</nav>
+
+{% if tab == 'upcoming' %}
 {% if bookings %}
 <div class="list">
   {% for b in bookings %}
@@ -44,5 +54,48 @@
   <p class="muted">You have no upcoming bookings. Find a free room and book it in a few steps.</p>
   <a class="btn btn-primary" href="{{ url_for('availability') }}">{{ icon('search') }}Find a free room</a>
 </div>
+{% endif %}
+
+{% else %}
+{% if previous %}
+<div class="list">
+  {% for b in previous %}
+  {% set d = parse_date(b.booking_date) %}
+  <article class="card booking">
+    <div class="booking-date">
+      <span class="month">{{ d.strftime('%b') }}</span>
+      <span class="day">{{ d.strftime('%d') }}</span>
+      <span class="wd">{{ d.strftime('%a') }}</span>
+    </div>
+    <div class="booking-info">
+      <h3>Room {{ b.room_name }}
+        {% if b.status == 'cancelled' %}<span class="pill pill-cancelled">{{ 'Cancelled by admin' if b.cancel_note else 'Cancelled' }}</span>
+        {% else %}<span class="pill pill-done">{{ icon('check', 'icon-sm') }}Used</span>{% endif %}
+      </h3>
+      <div class="booking-meta">
+        <span>{{ icon('clock') }}{{ b.slot_label }}</span>
+        <span>{{ icon('pin') }}{{ b.building }}, {{ b.floor }}</span>
+        {% if b.my_rating %}<span class="stars">{{ icon('star') }}You rated it {{ b.my_rating }}/5</span>{% endif %}
+      </div>
+      {% if b.cancel_note %}<p class="muted small" style="margin-top:6px">{{ b.cancel_note }}</p>{% endif %}
+    </div>
+    <div class="booking-actions">
+      {% if b.status == 'active' and not b.my_rating %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('review_booking', booking_id=b.id) }}">{{ icon('star', 'icon-sm') }}Review</a>
+      {% endif %}
+      {% if b.is_active %}
+      <a class="btn btn-primary btn-sm" href="{{ url_for('availability', date=today, building=slugify(b.building), _anchor='room-' ~ b.room_id) }}">Book again {{ icon('arrow-right', 'icon-sm') }}</a>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">
+  <span class="empty-icon">{{ icon('history') }}</span>
+  <h3>No previous bookings yet</h3>
+  <p class="muted">After you use or cancel a booking, it shows here.</p>
+</div>
+{% endif %}
 {% endif %}
 {% endblock %}

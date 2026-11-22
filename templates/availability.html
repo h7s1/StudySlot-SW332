@@ -32,10 +32,19 @@
       {% endfor %}
     </select>
   </div>
+  <div class="field">
+    <label for="min_seats">Seats</label>
+    <select id="min_seats" name="min_seats">
+      <option value="">Any size</option>
+      {% for n in seat_options %}
+      <option value="{{ n }}" {{ 'selected' if n == min_seats }}>At least {{ n }} seats</option>
+      {% endfor %}
+    </select>
+  </div>
   <button class="btn btn-primary" type="submit">{{ icon('search') }}Check</button>
   <div class="day-nav">
-    {% if prev_day %}<a class="btn btn-ghost" href="{{ url_for('availability', date=prev_day, slot_id=slot_id, building=building_slug or None) }}">{{ icon('arrow-left', 'icon-sm') }}Previous day</a>{% endif %}
-    {% if next_day %}<a class="btn btn-ghost" href="{{ url_for('availability', date=next_day, slot_id=slot_id, building=building_slug or None) }}">Next day {{ icon('arrow-right', 'icon-sm') }}</a>{% endif %}
+    {% if prev_day %}<a class="btn btn-ghost" href="{{ url_for('availability', date=prev_day, slot_id=slot_id, building=building_slug or None, min_seats=min_seats or None) }}">{{ icon('arrow-left', 'icon-sm') }}Previous day</a>{% endif %}
+    {% if next_day %}<a class="btn btn-ghost" href="{{ url_for('availability', date=next_day, slot_id=slot_id, building=building_slug or None, min_seats=min_seats or None) }}">Next day {{ icon('arrow-right', 'icon-sm') }}</a>{% endif %}
   </div>
 </form>
 
@@ -51,9 +60,19 @@
     <span class="free-count">{{ icon('check', 'icon-sm') }}{{ free_count }} free slot{{ '' if free_count == 1 else 's' }} on {{ day.strftime('%a %d %b') }}</span>
   </div>
 
-  {% if building %}
-  <p class="filter-note">{{ icon('building', 'icon-sm') }}Showing {{ building.name }} only. <a href="{{ url_for('availability', date=date_str, slot_id=slot_id) }}">Show all buildings</a></p>
+  {% if building or min_seats %}
+  <p class="filter-note">{{ icon('building', 'icon-sm') }}Showing
+    {{ building.name if building else 'all buildings' }}{% if min_seats %}, rooms with at least {{ min_seats }} seats{% endif %}.
+    <a href="{{ url_for('availability', date=date_str, slot_id=slot_id) }}">Clear filters</a></p>
   {% endif %}
+
+  {% if not grid %}
+  <div class="card empty">
+    <span class="empty-icon">{{ icon('search') }}</span>
+    <h3>No rooms match these filters</h3>
+    <p class="muted">Try fewer seats or another building.</p>
+  </div>
+  {% else %}
 
   <div class="table-wrap card">
     <table class="grid">
@@ -82,7 +101,12 @@
             {% elif c.status == 'mine' %}
               <a class="cell cell-mine" href="{{ url_for('my_bookings') }}" title="You booked a seat in this room at this time"><span class="cell-main">{{ icon('check') }}Yours</span><small>your booking</small></a>
             {% elif c.status == 'full' %}
-              <span class="cell cell-booked" title="All {{ row.room.capacity }} seats are booked"><span class="cell-main">Full</span><small>no seats left</small></span>
+              {% set nf = c.next_free %}
+              {% if nf %}
+              <a class="cell cell-booked" href="{{ url_for('availability', date=nf.date.isoformat(), building=building_slug or None, min_seats=min_seats or None, _anchor='room-' ~ row.room.id) }}" title="All {{ row.room.capacity }} seats are booked. Next free seat: {{ nf.date.strftime('%a %d %b') }} at {{ nf.start }}"><span class="cell-main">Full</span><small class="next-free">Free {{ 'at ' ~ nf.start if nf.date == day else nf.date.strftime('%a %d') ~ ', ' ~ nf.start }}</small></a>
+              {% else %}
+              <span class="cell cell-booked" title="All {{ row.room.capacity }} seats are booked"><span class="cell-main">Full</span><small>no free time in 14 days</small></span>
+              {% endif %}
             {% elif c.status == 'blocked' %}
               <span class="cell cell-blocked" title="Blocked by the admin for {{ c.reason }}"><span class="cell-main">{{ icon('ban') }}Blocked</span><small>{{ c.reason|capitalize }}</small></span>
             {% else %}
@@ -95,6 +119,7 @@
       </tbody>
     </table>
   </div>
-  <p class="note">{{ icon('info') }}<span>Each booking takes one seat. Several students can book the same room until all of its seats are taken, then it shows as Full.</span></p>
+  <p class="note">{{ icon('info') }}<span>Each booking takes one seat. Several students can book the same room until all of its seats are taken, then it shows as Full with the time it is free again.</span></p>
+  {% endif %}
 {% endif %}
 {% endblock %}

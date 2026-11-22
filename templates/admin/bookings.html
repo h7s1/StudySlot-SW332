@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}All bookings{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('list', 'icon-sm') }}Bookings</span>
+    <h1>All bookings</h1>
+    <p class="muted">Every student booking in one place. Search by date, room or student.</p>
+  </div>
+</div>
+
+<form class="card filter-row" method="get" style="margin-bottom:20px">
+  <div class="field">
+    <label for="date">Date</label>
+    <div class="input-icon">{{ icon('calendar') }}<input id="date" type="date" name="date" value="{{ f.date }}"></div>
+  </div>
+  <div class="field">
+    <label for="room_id">Room</label>
+    <select id="room_id" name="room_id">
+      <option value="">All rooms</option>
+      {% for r in rooms %}<option value="{{ r.id }}" {{ 'selected' if r.id == f.room_id }}>{{ r.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="q">Student</label>
+    <div class="input-icon">{{ icon('user') }}<input id="q" name="q" value="{{ f.q }}" placeholder="Name or email"></div>
+  </div>
+  <div class="field">
+    <label for="show">Show</label>
+    <select id="show" name="show">
+      <option value="upcoming" {{ 'selected' if f.show != 'all' }}>Upcoming active bookings</option>
+      <option value="all" {{ 'selected' if f.show == 'all' }}>All, including past and cancelled</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">{{ icon('search') }}Search</button>
+  <a class="btn btn-ghost" href="{{ url_for('admin_bookings') }}">Clear</a>
+</form>
+
+<div class="card">
+  <div class="section-head">
+    <h3>Results</h3>
+    <span class="count">{{ rows|length }} booking{{ '' if rows|length == 1 else 's' }}</span>
+  </div>
+  {% if rows %}
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Date</th><th>Time</th><th>Room</th><th>Student</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for b in rows %}
+      <tr>
+        <td>{{ parse_date(b.booking_date).strftime('%a %d %b %Y') }}</td>
+        <td>{{ b.slot_label }}</td>
+        <td><strong>{{ b.room_name }}</strong><span class="muted small">{{ b.building }}</span></td>
+        <td>{{ b.full_name }}<span class="muted small">{{ b.email }}</span></td>
+        <td>
+          {% if b.status == 'cancelled' %}<span class="pill pill-cancelled">{{ 'Cancelled by admin' if b.cancel_note else 'Cancelled' }}</span>
+          {% elif b.booking_date < today %}<span class="pill pill-done">Used</span>
+          {% else %}<span class="pill pill-active">Active</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty" style="padding:36px 0">
+    <span class="empty-icon">{{ icon('search') }}</span>
+    <p class="muted">No bookings match this search.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

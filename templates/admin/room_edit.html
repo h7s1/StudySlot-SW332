@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ room.name }}{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="page-head">
+    <div>
+      <a class="back-link" href="{{ url_for('admin_rooms') }}">{{ icon('arrow-left', 'icon-sm') }}All classrooms</a>
+      <span class="eyebrow">{{ icon('edit', 'icon-sm') }}Edit room</span>
+      <h1>Edit {{ room.name }}</h1>
+      <p class="muted">Change the details of this room. Seats cannot be fewer than the students already booked in one time slot.</p>
+    </div>
+  </div>
+  <form class="card" method="post">
+    <div class="form-grid">
+      <div><label for="name">Room name</label><input id="name" name="name" value="{{ form.name }}"></div>
+      <div><label for="capacity">Seats</label><input id="capacity" type="number" name="capacity" min="1" max="200" value="{{ form.capacity or '' }}"></div>
+      <div><label for="building">Building</label><input id="building" name="building" value="{{ form.building }}"></div>
+      <div><label for="floor">Floor</label><input id="floor" name="floor" value="{{ form.floor }}"></div>
+      <div class="full"><label for="features">Features (optional)</label><input id="features" name="features" value="{{ form.features or '' }}"></div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-ghost" href="{{ url_for('admin_rooms') }}">Cancel</a>
+      <button class="btn btn-primary" type="submit">{{ icon('check') }}Save changes</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

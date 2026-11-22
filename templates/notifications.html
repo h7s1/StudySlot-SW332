@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ icon('bell', 'icon-sm') }}Notifications</span>
+    <h1>Notifications</h1>
+    <p class="muted">Copies of your confirmation emails and notices from the admin.</p>
+  </div>
+</div>
+{% if items %}
+<div class="notice-list">
+  {% for n in items %}
+  <article class="card notice {{ 'unread' if n.id in unread_ids }}">
+    <span class="stat-icon {{ 'tint-a' if n.kind == 'email' else 'tint-c' }}">{{ icon('mail' if n.kind == 'email' else 'bell') }}</span>
+    <div style="flex:1">
+      <h3>{{ n.subject }}</h3>
+      <div class="muted small">{{ 'Email sent to ' ~ g.user.email if n.kind == 'email' else 'Notice' }} · {{ n.created_at[:16] }}{% if n.id in unread_ids %} · <strong>New</strong>{% endif %}</div>
+      {% if n.kind == 'email' %}
+      <details><summary class="small">Show the email</summary><pre>{{ n.body }}</pre></details>
+      {% else %}
+      <p style="margin:8px 0 0">{{ n.body }}</p>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">
+  <span class="empty-icon">{{ icon('bell') }}</span>
+  <h3>No notifications yet</h3>
+  <p class="muted">When you book, change or cancel a room, a copy of the email shows here.</p>
+</div>
+{% endif %}
+{% endblock %}

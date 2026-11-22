@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Review a room{% endblock %}
+{% block content %}
+<div class="narrow">
+  <div class="page-head">
+    <div>
+      <a class="back-link" href="{{ url_for('my_bookings', tab='previous') }}">{{ icon('arrow-left', 'icon-sm') }}Previous bookings</a>
+      <span class="eyebrow">{{ icon('star', 'icon-sm') }}Review</span>
+      <h1>How was room {{ booking.room_name }}?</h1>
+      <p class="muted">You used it on {{ parse_date(booking.booking_date).strftime('%A %d %B') }}, {{ booking.slot_label }}. Your rating helps other students choose a room.</p>
+    </div>
+  </div>
+  <form class="card" method="post">
+    <label>Your rating</label>
+    <div class="rating-pick">
+      {% for n in [5, 4, 3, 2, 1] %}
+      <input type="radio" id="r{{ n }}" name="rating" value="{{ n }}" {{ 'checked' if form.rating == n }}>
+      <label for="r{{ n }}" title="{{ n }} star{{ '' if n == 1 else 's' }}">{{ icon('star') }}</label>
+      {% endfor %}
+    </div>
+    <label for="comment">Comment (optional)</label>
+    <textarea id="comment" name="comment" maxlength="300" placeholder="e.g. Quiet room, the projector works well.">{{ form.comment }}</textarea>
+    <div class="actions">
+      <a class="btn btn-ghost" href="{{ url_for('my_bookings', tab='previous') }}">Cancel</a>
+      <button class="btn btn-primary" type="submit">{{ icon('check') }}Save review</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

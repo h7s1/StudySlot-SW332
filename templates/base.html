@@ -17,12 +17,16 @@
       {% if g.user %}
       <nav class="nav">
         {% if g.user.role == 'admin' %}
-          <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if request.endpoint == 'admin_dashboard' }}">{{ icon('grid') }}Dashboard</a>
-          <a href="{{ url_for('admin_block') }}" class="{{ 'active' if request.endpoint == 'admin_block' }}">{{ icon('ban') }}Block Time Slots</a>
+          <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if request.endpoint in ('admin_dashboard', 'admin_settings') }}">{{ icon('grid') }}Dashboard</a>
+          <a href="{{ url_for('admin_bookings') }}" class="{{ 'active' if request.endpoint == 'admin_bookings' }}">{{ icon('list') }}Bookings</a>
+          <a href="{{ url_for('admin_rooms') }}" class="{{ 'active' if request.endpoint in ('admin_rooms', 'admin_room_edit') }}">{{ icon('door') }}Classrooms</a>
+          <a href="{{ url_for('admin_block') }}" class="{{ 'active' if request.endpoint == 'admin_block' }}">{{ icon('ban') }}Block Slots</a>
+          <a href="{{ url_for('admin_reports') }}" class="{{ 'active' if request.endpoint == 'admin_reports' }}">{{ icon('flag') }}Reports</a>
         {% else %}
           <a href="{{ url_for('rooms') }}" class="{{ 'active' if request.endpoint in ('rooms', 'building_rooms') }}">{{ icon('building') }}Buildings</a>
           <a href="{{ url_for('availability') }}" class="{{ 'active' if request.endpoint in ('availability', 'book') }}">{{ icon('search') }}Find a Free Room</a>
-          <a href="{{ url_for('my_bookings') }}" class="{{ 'active' if request.endpoint in ('my_bookings', 'cancel_booking', 'change_booking') }}">{{ icon('calendar') }}My Bookings</a>
+          <a href="{{ url_for('my_bookings') }}" class="{{ 'active' if request.endpoint in ('my_bookings', 'cancel_booking', 'change_booking', 'review_booking') }}">{{ icon('calendar') }}My Bookings</a>
+          <a href="{{ url_for('notifications') }}" class="{{ 'active' if request.endpoint == 'notifications' }}">{{ icon('bell') }}Notifications{% if unread_count %}<span class="nav-badge">{{ unread_count }}</span>{% endif %}</a>
         {% endif %}
       </nav>
       <div class="user">
@@ -45,7 +49,7 @@
   <footer class="footer">
     <div class="wrap">
       <span>© StudySlot · Classroom booking for university students</span>
-      <span>SW332 · Group 4 (O53) · Sprint 1</span>
+      <span>SW332 · Group 4 (O53) · Sprint 2</span>
     </div>
   </footer>
 {% endblock %}
